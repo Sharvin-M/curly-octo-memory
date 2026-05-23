@@ -5,7 +5,7 @@
 #include <linux/module.h>
 
 MODULE_LICENSE("GPL");
-MODULE_AUTHOR("Sharvin");
+MODULE_AUTHOR("YVNG SHRIVS");
 MODULE_DESCRIPTION("Sharvin's first basic loadable kernel driver");
 
 /* constructor */
