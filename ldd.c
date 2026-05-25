@@ -12,9 +12,24 @@ MODULE_DESCRIPTION("Sharvin's first basic loadable kernel driver");
 static struct proc_dir_entry *sharvin_driver_proc_file; // Declare struct ptr for proc file.
 
 ssize_t	(*proc_read)(struct file *, char __user *, size_t, loff_t *);
-static ssize_t sharvin_driver_read (struct file *file_ptr, char *usr_space_buff, size_t count, loff_t* offset) {
+static ssize_t sharvin_driver_read (struct file *file_ptr,
+                                    char *usr_space_buff,
+                                    size_t count,
+                                    loff_t* offset) {
+    char msg[] = "Blegh!\n";
+    size_t len = strlen(msg);
+    int return_value;
+
+    if (*offset >= len) {
+        return 0;
+    }
+    
+    return_value = copy_to_user(usr_space_buff, msg, len);
+    *offset += len;
+
     printk("sharvin_driver_read\n");
-    return 0;
+    return len;
+
 }
 
 static struct proc_ops sharvin_driver_proc_ops = {
