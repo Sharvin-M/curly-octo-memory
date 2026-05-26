@@ -4,6 +4,7 @@
 #include <linux/init.h> 
 #include <linux/module.h>
 #include <linux/proc_fs.h>
+#include <asm/uaccess.h>
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("YVNG SHRIVS");
@@ -11,11 +12,30 @@ MODULE_DESCRIPTION("Sharvin's first basic loadable kernel driver");
 
 static struct proc_dir_entry *sharvin_driver_proc_file; // Declare struct ptr for proc file.
 
-ssize_t	(*proc_read)(struct file *, char __user *, size_t, loff_t *);
+
+static ssize_t sharvin_driver_write (struct file *file_ptr,
+                                     const char *usr_space_buff,
+                                     size_t count,
+                                     loff_t *offset) {
+    
+    /* get buffer size */
+	size_t procfs_buffer_size = count;
+    char * k_mem = kmalloc(count, GFP_KERNEL); 
+	
+
+	if ( copy_from_user(k_mem, usr_space_buff, procfs_buffer_size) ) {
+		return -EFAULT;
+	}
+
+    printk("sharvin_driver_write\n");
+	return procfs_buffer_size;
+
+}
+
 static ssize_t sharvin_driver_read (struct file *file_ptr,
                                     char *usr_space_buff,
                                     size_t count,
-                                    loff_t* offset) {
+                                    loff_t *offset) {
     char msg[] = "Blegh!\n";
     size_t len = strlen(msg);
     int return_value;
@@ -33,6 +53,7 @@ static ssize_t sharvin_driver_read (struct file *file_ptr,
 }
 
 static struct proc_ops sharvin_driver_proc_ops = {
+    .proc_write = sharvin_driver_write,
     .proc_read = sharvin_driver_read
 };
 
@@ -57,10 +78,10 @@ static void sharvin_module_exit (void) {
     printk("sharvin_module_exit: started\n");
 
     proc_remove(sharvin_driver_proc_file);
+    kfree(k_mem);
 
     printk("sharvin_module_exit: finished\n");
 }
-
 
 
 
